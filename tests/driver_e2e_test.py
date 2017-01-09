@@ -21,8 +21,6 @@ import os
 import tempfile
 import unittest
 
-import google3
-
 from cloudsdk_test_driver import constants
 from cloudsdk_test_driver import driver
 
