@@ -427,13 +427,12 @@ class SDK(object):
     out, err, code = self.RunGcloudRawOutput(
         command, formats, filters, timeout, env)
 
-    # TODO(magimaster): The --help flag doesn't output json.
     if out:
       try:
         return json.loads(out), err, code
       except ValueError:
-        raise error.SDKError('Command [{cmd}] did not return JSON output: '
-                             '{out}'.format(cmd=command, out=out))
+        # TODO(magimaster): Log failure to decode JSON when logging is added
+        return out, err, code
     else:
       return None, err, code
 

@@ -24,14 +24,12 @@ import random
 import re
 import shutil
 import StringIO
-import subprocess  # Tests are run in google3 so subprocess32 won't get imported
+import subprocess
 import sys
 import tarfile
 import tempfile
 import unittest
 import urllib2
-
-import google3
 
 from cloudsdk_test_driver import _config
 from cloudsdk_test_driver import _sdk_tar
