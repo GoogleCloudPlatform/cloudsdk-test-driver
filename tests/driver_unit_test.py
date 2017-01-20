@@ -552,6 +552,47 @@ class GcloudTestDriverRunGcloudTest(Base):
         self.sdk, ['gcloud', 'foo', '--format=json'], None, None)
 
 
+class GcloudTestDriverRunGcloudJSONTest(Base):
+
+  def setUp(self):
+    self.MockSDKFactoryDependencies()
+
+    self.sdk = driver.DefaultSDK()
+
+  def PrepareOutput(self, output):
+    self.out = output
+    self.err = 'error'
+    self.code = 0
+
+    self.run_patch = self.StartObjectPatch(
+        driver.SDK, 'RunGcloudRawOutput', return_value=(
+            self.out, self.err, self.code))
+
+  def testRunGcloudJSONOutput(self):
+    self.PrepareOutput("{'a': 'b', 'c': 'd'}")
+
+    out, _, _ = self.sdk.RunGcloud('foo')
+
+    # Verify that the result is valid json
+    json.dumps(out)
+
+  def testRunGcloudStringOutput(self):
+    self.PrepareOutput("not json")
+
+    out, _, _ = self.sdk.RunGcloud('foo')
+
+    # Verify that the result is valid json even though the input wasn'tar
+    json.dumps(out)
+
+  def testRunGcloudEmptyOutput(self):
+    self.PrepareOutput("")
+
+    out, _, _ = self.sdk.RunGcloud('foo')
+
+    # Verify that the result is valid json even though the input wasn'tar
+    json.dumps(out)
+
+
 class GcloudTestDriverErrorTest(Base):
 
   def testError(self):
