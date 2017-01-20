@@ -19,8 +19,6 @@ from __future__ import print_function
 
 import unittest
 
-import google3
-
 from cloudsdk_test_driver import driver
 
 
