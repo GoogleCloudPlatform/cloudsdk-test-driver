@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import json
 import os
 import tempfile
 import unittest
@@ -84,6 +85,19 @@ class GcloudTestDriverNoDestroy(unittest.TestCase):
       sdk.RunInitializationCommands()
       _, _, ret = sdk.RunGcloud(['config', 'list'])
       self.assertEqual(0, ret)
+
+
+class GcloudTestDriverHelp(unittest.TestCase):
+
+  def testHelpCommand(self):
+    # The help commands do not return JSON results unlike almost all normal
+    # commands. Verify that they're still handled properly.
+    with driver.Manager():
+      sdk = driver.DefaultSDK()
+      out, _, ret = sdk.RunGcloud(['config', '--help'])
+      self.assertEqual(0, ret)
+      # Just verify that whatever RunGcloud returns is valid as a JSON object.
+      json.dumps(out)
 
 
 if __name__ == '__main__':

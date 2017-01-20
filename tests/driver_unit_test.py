@@ -581,7 +581,7 @@ class GcloudTestDriverRunGcloudJSONTest(Base):
 
     out, _, _ = self.sdk.RunGcloud('foo')
 
-    # Verify that the result is valid json even though the input wasn'tar
+    # Verify that the result is valid json even though the input wasn't
     json.dumps(out)
 
   def testRunGcloudEmptyOutput(self):
@@ -589,7 +589,7 @@ class GcloudTestDriverRunGcloudJSONTest(Base):
 
     out, _, _ = self.sdk.RunGcloud('foo')
 
-    # Verify that the result is valid json even though the input wasn'tar
+    # Verify that the result is valid json even though the input wasn't
     json.dumps(out)
 
 
