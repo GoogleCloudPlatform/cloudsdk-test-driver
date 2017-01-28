@@ -386,7 +386,7 @@ class SDK(object):
 
     p = subprocess.Popen(
         _PrepareCommand(command), stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE, cwd=self._sdk_dir, env=env)
+        stderr=subprocess.PIPE, cwd=os.path.dirname(self._sdk_dir), env=env)
     if TIMEOUT_ENABLED:
       out, err = p.communicate(timeout=timeout)
     else:
