@@ -86,6 +86,7 @@ class Base(unittest.TestCase):
 
     self.expected_sdk_dir = os.path.join(
         'driver_location', constants.SDK_FOLDER)
+    self.expected_cwd = os.path.dirname(self.expected_sdk_dir)
 
     self.expected_config_name = 'configxxxxxxxx'
 
@@ -338,7 +339,7 @@ class GcloudTestDriverSDKConstructionTest(Base):
     sdk = driver.DefaultSDK()
     sdk.Run(['config', 'list'])
     _, kwargs = self.popen_patch.call_args
-    self.assertEqual(self.expected_sdk_dir, kwargs['cwd'])
+    self.assertEqual(self.expected_cwd, kwargs['cwd'])
 
   def testNotInitialized(self):
     del os.environ[constants.DRIVER_LOCATION_ENV]
@@ -442,6 +443,7 @@ class GcloudTestDriverSDKMethodsTest(Base):
         driver.SDK, 'RunGcloudRawOutput', return_value=('out', 'err', 0))
 
     self.sdk = self.GetSDK()
+    self.expected_cwd = os.path.dirname(self.sdk_dir)
     self.popen_patch.reset_mock()
 
   def testRunTimeoutDisabled(self):
@@ -450,7 +452,7 @@ class GcloudTestDriverSDKMethodsTest(Base):
     self.sdk.Run('foo')
     self.assertCalledOnceWithSomeArgs(
         self.popen_patch, ['foo'],
-        cwd=self.sdk_dir, env=self.environ)
+        cwd=self.expected_cwd, env=self.environ)
     self.mock_popen.communicate.assert_called_once_with()
 
   def testRunTimeoutWarning(self):
@@ -461,7 +463,7 @@ class GcloudTestDriverSDKMethodsTest(Base):
     self.sdk.Run('foo', timeout=1)
     self.assertCalledOnceWithSomeArgs(
         self.popen_patch, ['foo'],
-        cwd=self.sdk_dir, env=self.environ)
+        cwd=self.expected_cwd, env=self.environ)
     self.mock_popen.communicate.assert_called_once_with()
     err_message = stderr.getvalue()
     self.assertIn('subprocess32', err_message)
@@ -472,7 +474,7 @@ class GcloudTestDriverSDKMethodsTest(Base):
     self.sdk.Run('foo', timeout=1)
     self.assertCalledOnceWithSomeArgs(
         self.popen_patch, ['foo'],
-        cwd=self.sdk_dir, env=self.environ)
+        cwd=self.expected_cwd, env=self.environ)
     self.mock_popen.communicate.assert_called_once_with(timeout=1)
 
   def testRunEnv(self):
@@ -483,7 +485,7 @@ class GcloudTestDriverSDKMethodsTest(Base):
     self.sdk.Run('foo', env={'x': 'y'})
     self.assertCalledOnceWithSomeArgs(
         self.popen_patch, ['foo'],
-        cwd=self.sdk_dir, env=env)
+        cwd=self.expected_cwd, env=env)
     self.mock_popen.communicate.assert_called_once_with()
 
 
