@@ -743,24 +743,36 @@ class GcloudTestDriverUnpackTarTest(Base):
 
   def testUnpackInstaller(self):
     # A tar only containing the installer won't contain the components json.
-    # The resulting url should point to the components file at the same location
-    # the tar was downloaded from.
+    # The driver shouldn't set a components url and instead let the installer
+    # use its default.
     self.StartObjectPatch(os.path, 'isfile', return_value=False)
     url = _sdk_tar.UnpackTar(
         self.download_path, 'http://foo/bar.tar', self.temp_dir)
-    self.assertEqual('http://foo/' + constants.COMPONENTS_FILE, url)
+    self.assertEqual(None, url)
     self.assertEqual(
         [mock.call(name=self.download_path)], self.tar_patch.call_args_list)
 
-  def testUnpackLocalInstaller(self):
-    # A local installer tar will need its path converted into a file url.
-    self.StartObjectPatch(os.path, 'isfile', return_value=False)
+  def testUnpackLocalInstallerWithComponents(self):
+    # A local installer tar will need its path converted into a file url if the
+    # components json is available locally.
+    self.StartObjectPatch(os.path, 'isfile', side_effect=[False, True])
     url = _sdk_tar.UnpackTar(
         self.download_path, self.download_path, self.temp_dir)
     self.assertEqual(
         'file://' + os.path.join(
             os.path.dirname(self.download_path), constants.COMPONENTS_FILE),
         url)
+    self.tar_patch.assert_called_with(name=self.download_path)
+    for call in self.tar_patch.call_args_list:
+      self.assertNotEqual(call, mock.call(name=self.installer))
+
+  def testUnpackLocalInstallerNoComponents(self):
+    # A local installer tar without the components file should return None so
+    # the installer can use its baked in location for the components.
+    self.StartObjectPatch(os.path, 'isfile', return_value=False)
+    url = _sdk_tar.UnpackTar(
+        self.download_path, self.download_path, self.temp_dir)
+    self.assertEqual(None, url)
     self.tar_patch.assert_called_with(name=self.download_path)
     for call in self.tar_patch.call_args_list:
       self.assertNotEqual(call, mock.call(name=self.installer))

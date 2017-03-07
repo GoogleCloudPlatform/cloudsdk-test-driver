@@ -108,7 +108,8 @@ def UnpackTar(download_path, tar_location, root_directory):
     root_directory: string, path to install to.
 
   Returns:
-    string, the URL for the components json for this installation.
+    string, the URL for the components json for this installation or None if
+      the installer should use its default location for the components.
 
   Raises:
     error.InitError: if something went wrong when unpacking the tar.
@@ -139,11 +140,23 @@ def UnpackTar(download_path, tar_location, root_directory):
     except tarfile.TarError as err:
       error.RaiseTarError('extracting', download_path, err.message)
   else:
-    # tar_location pointed to an installer tar. Make sure the snapshot url
-    # points back to the same place. Add a file:// scheme if the tar_location
-    # was a local file.
-    snapshot_url = urlparse.urljoin('file://', urlparse.urljoin(
-        tar_location, constants.COMPONENTS_FILE))
+    # tar_location pointed to an installer tar. If the tar_location was a local
+    # path, try and find the corresponding component file. (Particularly, if
+    # someone unzipped a repo tar and tried to use the installer from within
+    # that.) Otherwise, leave the components location unset and let the
+    # installer use the default.
+    # TODO(magimaster): This probably misses a few corner cases.
+    url_parts = urlparse.urlparse(tar_location)
+    if not url_parts.scheme:  # Local path
+      components_json = os.path.join(
+          os.path.dirname(tar_location), constants.COMPONENTS_FILE)
+      if os.path.isfile(components_json):
+        snapshot_url = urlparse.urljoin('file://', components_json)
+      else:
+        snapshot_url = None
+    else:
+      snapshot_url = None
+
     # This wasn't a repo, so move the files up a level for consistency.
     try:
       for filename in os.listdir(repo_directory):
