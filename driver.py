@@ -223,7 +223,9 @@ def Init(tar_location=None, additional_components=None, root_directory=None):
   download_path = _sdk_tar.DownloadTar(tar_location, root_directory)
 
   snapshot_url = _sdk_tar.UnpackTar(download_path, tar_location, root_directory)
-  env = {constants.SNAPSHOT_ENV: snapshot_url}
+  env = {}
+  if snapshot_url:
+    env[constants.SNAPSHOT_ENV] = snapshot_url
 
   if sys.executable:
     env[constants.PYTHON_ENV] = sys.executable

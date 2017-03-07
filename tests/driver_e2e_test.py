@@ -100,5 +100,17 @@ class GcloudTestDriverHelp(unittest.TestCase):
       json.dumps(out)
 
 
+class GcloudTestAlternateTar(unittest.TestCase):
+
+  def testInstallPreviousVersion(self):
+    # Make sure the driver can install from one of the archived versions.
+    with driver.Manager(
+        tar_location='https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-140.0.0-linux-x86_64.tar.gz'):
+      sdk = driver.DefaultSDK()
+      sdk.RunInitializationCommands()
+      _, _, ret = sdk.RunGcloud(['config', 'list'])
+      self.assertEqual(0, ret)
+
+
 if __name__ == '__main__':
   unittest.main()
